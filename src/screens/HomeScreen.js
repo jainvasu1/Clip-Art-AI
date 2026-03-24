@@ -60,12 +60,13 @@ export default function HomeScreen() {
         maxWidth: 1024,         // resize large images
         maxHeight: 1024,
       },
-      (response) => validateAndPickImage(response, (asset) => {
-        setImage(asset);
-        setResults({});
-      }),
+      response =>
+        validateAndPickImage(response, asset => {
+          setImage(asset);
+          setResults({});
+        }),
     );
-  };
+};
 
   const pickFromCamera = () => {
     launchCamera(
@@ -76,16 +77,25 @@ export default function HomeScreen() {
         maxWidth: 1024,
         maxHeight: 1024,
         saveToPhotos: false,
+        cameraType: 'back',
       },
-      (response) => validateAndPickImage(response, (asset) => {
-        setImage(asset);
-        setResults({});
-      }),
+      response => {
+        if (response.errorCode === 'camera_unavailable') {
+          Alert.alert('Error', 'Camera not available on this device.');
+          return;
+        }
+        validateAndPickImage(response, asset => {
+          setImage(asset);
+          setResults({});
+        });
+      },
     );
   };
 
   const handleGenerate = async () => {
-    if (!image?.base64) return;
+    if (!image?.base64) {
+      return;
+    }
     setGenerating(true);
     setResults({});
 
@@ -98,7 +108,7 @@ export default function HomeScreen() {
 
   const handleChangeImage = () => {
     Alert.alert('Change Image', 'Choose an option', [
-      { text: '📁 Gallery', onPress: pickFromGallery },
+      { text: '📁 Gallery', onPress: pickFromGallery},
       { text: '📷 Camera', onPress: pickFromCamera },
       { text: 'Cancel', style: 'cancel' },
     ]);
@@ -149,17 +159,6 @@ export default function HomeScreen() {
                 <Text style={styles.placeholderSub}>JPEG, PNG or WEBP · Max 5MB</Text>
               </TouchableOpacity>
 
-              {/* Upload buttons */}
-              <View style={styles.uploadBtns}>
-                <TouchableOpacity style={styles.uploadBtn} onPress={pickFromGallery}>
-                  <Text style={styles.uploadBtnIcon}>📁</Text>
-                  <Text style={styles.uploadBtnText}>Gallery</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.uploadBtn} onPress={pickFromCamera}>
-                  <Text style={styles.uploadBtnIcon}>📷</Text>
-                  <Text style={styles.uploadBtnText}>Camera</Text>
-                </TouchableOpacity>
-              </View>
             </>
           )}
         </View>
