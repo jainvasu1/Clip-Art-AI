@@ -143,11 +143,11 @@ export default function HomeScreen() {
           ) : (
             <>
               {/* Empty state */}
-              <View style={styles.placeholder}>
+<TouchableOpacity style={styles.placeholder} onPress={handleChangeImage}>
                 <Text style={styles.placeholderIcon}>🖼️</Text>
                 <Text style={styles.placeholderTitle}>Upload Your Photo</Text>
                 <Text style={styles.placeholderSub}>JPEG, PNG or WEBP · Max 5MB</Text>
-              </View>
+              </TouchableOpacity>
 
               {/* Upload buttons */}
               <View style={styles.uploadBtns}>

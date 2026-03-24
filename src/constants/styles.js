@@ -11,9 +11,35 @@ export const COLORS = {
 };
 
 export const STYLES_LIST = [
-  { id: 'cartoon',    label: 'Cartoon',      emoji: '🎨', prompt: 'cartoon style, vibrant colors, bold outlines, fun and playful' },
-  { id: 'anime',      label: 'Anime',        emoji: '⛩️', prompt: 'anime style, japanese animation, clean lines, expressive eyes' },
-  { id: 'pixel',      label: 'Pixel Art',    emoji: '🕹️', prompt: 'pixel art style, 16-bit retro game art, pixelated' },
-  { id: 'sketch',     label: 'Sketch',       emoji: '✏️', prompt: 'pencil sketch, hand drawn, black and white outline art' },
-  { id: 'flat',       label: 'Flat Art',     emoji: '🎭', prompt: 'flat illustration, minimal design, geometric shapes, clean vector art' },
+  {
+    id: 'cartoon',
+    label: 'Cartoon',
+    emoji: '🎨',
+    prompt: 'cartoon style, vibrant colors, bold outlines, fun and playful',
+  },
+  {
+    id: 'anime',
+    label: 'Anime',
+    emoji: '⛩️',
+    prompt: 'anime style, japanese animation, clean lines, expressive eyes',
+  },
+  {
+    id: 'pixel',
+    label: 'Pixel Art',
+    emoji: '🕹️',
+    prompt: 'pixel art style, 16-bit retro game art, pixelated',
+  },
+  {
+    id: 'sketch',
+    label: 'Sketch',
+    emoji: '✏️',
+    prompt: 'pencil sketch, hand drawn, black and white outline art',
+  },
+  {
+    id: 'flat',
+    label: 'Flat Art',
+    emoji: '🎭',
+    prompt:
+      'flat illustration, minimal design, geometric shapes, clean vector art',
+  },
 ];
