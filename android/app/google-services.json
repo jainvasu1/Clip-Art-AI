@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1040493511192",
+    "project_id": "clipartai",
+    "storage_bucket": "clipartai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040493511192:android:ced443df540b667e46396d",
+        "android_client_info": {
+          "package_name": "com.clipartai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWhbpayFTxA7TCNOke-f8fxLosHLo2ztQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
