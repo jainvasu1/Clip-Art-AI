@@ -30,6 +30,11 @@ const ALL_STYLES = [
     label: 'Sketch / Outline',
     image: 'https://r2.starryai.com/results/1024014253/1687f728-9c55-4777-833e-44f0da49ae31.webp',
   },
+  {
+    id: 'clay',
+    label: 'Clay 3D',
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeUXoj9go828jbJtp6vuMdjJZ3nW3RUJuVNg&s',
+  },
 ];
 
 export default function StyleSelectScreen({ onStylesSelected }) {

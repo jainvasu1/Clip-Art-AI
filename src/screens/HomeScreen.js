@@ -112,14 +112,24 @@ export default function HomeScreen({ selectedStyles = [], onBack, onGenerate }) 
           </TouchableOpacity>
         )}
 
-        {/* Selected styles pills */}
+       {/* Selected styles */}
         {selectedStyles.length > 0 && (
-          <View style={styles.pillsRow}>
-            {selectedStyles.map(s => (
-              <View key={s} style={styles.pill}>
-                <Text style={styles.pillText}>{s}</Text>
-              </View>
-            ))}
+          <View style={styles.stylesSection}>
+            <Text style={styles.stylesSectionTitle}>Selected Styles</Text>
+            <View style={styles.pillsRow}>
+              {selectedStyles.map(s => (
+                <View key={s} style={styles.pill}>
+                  <Text style={styles.pillText}>
+                    {s === 'cartoon' ? '🎨' :
+                     s === 'flat' ? '🎭' :
+                     s === 'anime' ? '⛩️' :
+                     s === 'pixel' ? '🕹️' :
+                     s === 'sketch' ? '✏️' :
+                     s === 'clay' ? '🧸' : '✨'} {s}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
         )}
 
@@ -268,6 +278,17 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#F5C5C2',
   },
   pillText: { color: PINK, fontSize: 12, fontWeight: '600', textTransform: 'capitalize' },
+  stylesSection: {
+    marginTop: 14,
+  },
+  stylesSectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#999',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
 
   // Option cards
   optionCard: {

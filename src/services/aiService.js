@@ -7,6 +7,7 @@ const STYLE_PROMPTS = {
   anime: 'anime style, japanese animation, clean lines, expressive eyes, studio ghibli style',
   pixel: 'pixel art style, 16-bit retro game art, pixelated, game sprite',
   sketch: 'pencil sketch style, hand drawn, black and white outline art, detailed sketch',
+  clay: 'clay 3D style, soft clay material, pastel colors, cute 3D render, blender clay art style',
 };
 
 const STABILITY_URL =
