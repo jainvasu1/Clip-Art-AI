@@ -1,30 +1,18 @@
-import { useState, useEffect } from 'react';
-import {StatusBar} from 'react-native';
-import auth from '@react-native-firebase/auth';
+import React, { useState } from 'react';
+import { StatusBar } from 'react-native';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return unsubscribe;
-  }, []);
-
-  if (loading) return null;
+  const [loggedIn, setLoggedIn] = useState(false);
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#0A0A0F" />
-      {user ? (
+      <StatusBar barStyle="dark-content" backgroundColor="#E8837A" />
+      {loggedIn ? (
         <HomeScreen />
       ) : (
-        <LoginScreen onLoginSuccess={() => {}} />
+        <LoginScreen onLoginSuccess={() => setLoggedIn(true)} />
       )}
     </>
   );

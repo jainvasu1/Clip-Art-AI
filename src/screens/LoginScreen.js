@@ -1,203 +1,410 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  ActivityIndicator,
-  Alert,
+  View, Text, TouchableOpacity, StyleSheet,
+  SafeAreaView, TextInput, KeyboardAvoidingView,
+  Platform, ScrollView, Alert, ActivityIndicator,
 } from 'react-native';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
-import auth from '@react-native-firebase/auth';
-import LinearGradient from 'react-native-linear-gradient';
-import {GOOGLE_WEB_CLIENT_ID} from '@env';
 
-GoogleSignin.configure({
-  webClientId: GOOGLE_WEB_CLIENT_ID,
-});
-
-export default function LoginScreen({onLoginSuccess}) {
+export default function LoginScreen({ onLoginSuccess }) {
+  const [screen, setScreen] = useState('welcome');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      const googleCredential = auth.GoogleAuthProvider.credential(
-        userInfo.idToken,
-        userInfo.accessToken,
-      );
-      await auth().signInWithCredential(googleCredential);
-      onLoginSuccess();
-    } catch (error) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        Alert.alert('Please wait', 'Sign in already in progress');
-      } else {
-        Alert.alert('Error', 'Google Sign-In failed. Try again.');
-      }
-    } finally {
-      setLoading(false);
+  const handleAuth = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill all fields');
+      return;
     }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      onLoginSuccess();
+    }, 1500);
   };
 
+  // ─── WELCOME SCREEN ───────────────────────────────────────
+  if (screen === 'welcome') {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.welcomeContainer}>
+          <View style={styles.welcomeTop}>
+            <View style={styles.decor1} />
+            <View style={styles.decor2} />
+            <View style={styles.decor3} />
+            <View style={styles.logoContainer}>
+              <View style={styles.logoCircle}>
+                <Text style={styles.logoEmoji}>🎨</Text>
+              </View>
+              <Text style={styles.appName}>CLIPART AI</Text>
+              <Text style={styles.appTagline}>Powered by AI</Text>
+            </View>
+          </View>
+
+          <View style={styles.welcomeBottom}>
+            <Text style={styles.welcomeTitle}>Welcome! 👋</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Transform your photos into stunning clipart with the power of AI
+            </Text>
+
+            <View style={styles.bulletList}>
+              {[
+                { icon: '🎨', text: 'Cartoon, Anime, Pixel & Sketch styles' },
+                { icon: '⚡', text: 'Generate all styles in seconds' },
+                { icon: '💾', text: 'Download & share your creations' },
+                { icon: '🔒', text: 'Secure & private' },
+              ].map((item, i) => (
+                <View key={i} style={styles.bulletRow}>
+                  <View style={styles.bulletIconBox}>
+                    <Text style={styles.bulletIcon}>{item.icon}</Text>
+                  </View>
+                  <Text style={styles.bulletText}>{item.text}</Text>
+                </View>
+              ))}
+            </View>
+
+            <TouchableOpacity
+              style={styles.continueBtn}
+              onPress={() => setScreen('signin')}
+              activeOpacity={0.85}>
+              <Text style={styles.continueBtnText}>Get Started  →</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ─── SIGN IN / SIGN UP SCREEN ─────────────────────────────
   return (
     <SafeAreaView style={styles.safe}>
-      <LinearGradient
-        colors={['#0A0A0F', '#1A0A2E', '#0A0A0F']}
-        style={styles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled">
 
-        {/* Top decoration */}
-        <View style={styles.topDecor}>
-          <View style={styles.circle1} />
-          <View style={styles.circle2} />
-        </View>
-
-        {/* Logo & Heading */}
-        <View style={styles.heroSection}>
-          <Text style={styles.emoji}>✨</Text>
-          <Text style={styles.heading}>Welcome to{'\n'}ClipArt AI</Text>
-          <Text style={styles.subheading}>Transform your photos into stunning art</Text>
-        </View>
-
-        {/* Feature points */}
-        <View style={styles.featuresCard}>
-          {[
-            { icon: '🎨', text: 'Cartoon, Anime, Pixel & more styles' },
-            { icon: '⚡', text: 'Generate all styles in parallel instantly' },
-            { icon: '💾', text: 'Download & share your creations' },
-            { icon: '🔒', text: 'Secure & private — your photos stay yours' },
-          ].map((item, i) => (
-            <View key={i} style={styles.featureRow}>
-              <Text style={styles.featureIcon}>{item.icon}</Text>
-              <Text style={styles.featureText}>{item.text}</Text>
+          <View style={styles.authTop}>
+            <View style={styles.decor1} />
+            <View style={styles.decor2} />
+            <TouchableOpacity
+              style={styles.backBtn}
+              onPress={() => setScreen('welcome')}>
+              <Text style={styles.backBtnText}>← Back</Text>
+            </TouchableOpacity>
+            <View style={styles.logoContainer}>
+              <View style={[styles.logoCircle, { width: 52, height: 52, borderRadius: 26 }]}>
+                <Text style={[styles.logoEmoji, { fontSize: 24 }]}>🎨</Text>
+              </View>
+              <Text style={styles.appName}>CLIPART AI</Text>
             </View>
-          ))}
-        </View>
+          </View>
 
-        {/* Google Sign In Button */}
-        <View style={styles.bottomSection}>
-          <TouchableOpacity
-            style={styles.googleBtn}
-            onPress={handleGoogleLogin}
-            activeOpacity={0.85}
-            disabled={loading}>
-            {loading ? (
-              <ActivityIndicator color="#1A1A2E" size="small" />
-            ) : (
-              <>
-                <Text style={styles.googleIcon}>G</Text>
-                <Text style={styles.googleBtnText}>Continue with Google</Text>
-              </>
+          <View style={styles.authCard}>
+            <Text style={styles.authTitle}>
+              {screen === 'signin' ? 'Sign In' : 'Sign Up'}
+            </Text>
+            <View style={styles.titleUnderline} />
+
+            {screen === 'signup' && (
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Full Name</Text>
+                <View style={styles.inputBox}>
+                  <Text style={styles.inputIcon}>👤</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your name"
+                    placeholderTextColor="#BBB"
+                    value={name}
+                    onChangeText={setName}
+                  />
+                </View>
+              </View>
             )}
-          </TouchableOpacity>
 
-          <Text style={styles.terms}>
-            By continuing, you agree to our Terms of Service{'\n'}and Privacy Policy
-          </Text>
-        </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <View style={styles.inputBox}>
+                <Text style={styles.inputIcon}>✉️</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="demo@email.com"
+                  placeholderTextColor="#BBB"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+            </View>
 
-      </LinearGradient>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <View style={styles.inputBox}>
+                <Text style={styles.inputIcon}>🔒</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#BBB"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Text style={styles.inputIcon}>{showPassword ? '🙈' : '👁️'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {screen === 'signin' && (
+              <TouchableOpacity style={styles.forgotBtn}>
+                <Text style={styles.forgotText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity
+              style={styles.authBtn}
+              onPress={handleAuth}
+              activeOpacity={0.85}
+              disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.authBtnText}>
+                  {screen === 'signin' ? 'Sign In' : 'Create Account'}
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity style={styles.googleBtn} activeOpacity={0.85}>
+              <View style={styles.googleIconBox}>
+                <Text style={styles.googleIconText}>G</Text>
+              </View>
+              <Text style={styles.googleBtnText}>Continue with Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.switchBtn}
+              onPress={() => setScreen(screen === 'signin' ? 'signup' : 'signin')}>
+              <Text style={styles.switchText}>
+                {screen === 'signin'
+                  ? "Don't have an account?  "
+                  : 'Already have an account?  '}
+                <Text style={styles.switchLink}>
+                  {screen === 'signin' ? 'Sign Up' : 'Sign In'}
+                </Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
+const PINK = '#E8837A';
+
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0A0A0F' },
-  container: { flex: 1, paddingHorizontal: 24 },
+  safe: { flex: 1, backgroundColor: PINK },
 
-  topDecor: { position: 'absolute', top: 0, left: 0, right: 0 },
-  circle1: {
-    position: 'absolute', top: -60, right: -60,
-    width: 220, height: 220, borderRadius: 110,
-    backgroundColor: 'rgba(124,58,237,0.15)',
-  },
-  circle2: {
-    position: 'absolute', top: 40, left: -80,
-    width: 180, height: 180, borderRadius: 90,
-    backgroundColor: 'rgba(79,70,229,0.1)',
-  },
-
-  heroSection: {
-    flex: 1,
+  // Welcome
+  welcomeContainer: { flex: 1 },
+  welcomeTop: {
+    height: 360,
+    backgroundColor: PINK,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 60,
+    overflow: 'hidden',
   },
-  emoji: { fontSize: 56, marginBottom: 16 },
-  heading: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    lineHeight: 44,
-    letterSpacing: 0.5,
-  },
-  subheading: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.5)',
-    textAlign: 'center',
-    marginTop: 12,
+  welcomeBottom: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    marginTop: -40,
+    padding: 28,
+    paddingTop: 32,
   },
 
-  featuresCard: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    padding: 20,
-    marginBottom: 32,
-    gap: 16,
+  // Logo
+  logoContainer: { alignItems: 'center', gap: 10 },
+  logoCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.4)',
   },
-  featureRow: {
+  logoEmoji: { fontSize: 32 },
+  appName: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: 4,
+  },
+  appTagline: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.7)',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
+
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    color: '#888',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  bulletList: { gap: 12, marginBottom: 28 },
+  bulletRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 12,
   },
-  featureIcon: { fontSize: 22 },
-  featureText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 14,
-    fontWeight: '500',
-    flex: 1,
+  bulletIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#FFF0EF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  bulletIcon: { fontSize: 18 },
+  bulletText: { fontSize: 14, color: '#444', fontWeight: '500', flex: 1 },
+  continueBtn: {
+    backgroundColor: PINK,
+    borderRadius: 50,
+    paddingVertical: 16,
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: PINK,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+  },
+  continueBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 
-  bottomSection: { paddingBottom: 40 },
-  googleBtn: {
-    backgroundColor: '#FFFFFF',
+  // Auth
+  authTop: {
+    height: 200,
+    backgroundColor: PINK,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  authCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    marginTop: -40,
+    padding: 28,
+    paddingTop: 32,
+  },
+  backBtn: { position: 'absolute', top: 20, left: 20 },
+  backBtnText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  authTitle: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    marginBottom: 6,
+  },
+  titleUnderline: {
+    width: 40, height: 3,
+    backgroundColor: PINK,
+    borderRadius: 2,
+    marginBottom: 24,
+  },
+  inputGroup: { marginBottom: 16 },
+  inputLabel: { fontSize: 13, fontWeight: '600', color: '#333', marginBottom: 6 },
+  inputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1.5,
+    borderBottomColor: '#E8E8E8',
+    paddingBottom: 8,
+    gap: 8,
+  },
+  inputIcon: { fontSize: 16 },
+  input: { flex: 1, fontSize: 15, color: '#1A1A1A', paddingVertical: 2 },
+  forgotBtn: { alignSelf: 'flex-end', marginBottom: 20 },
+  forgotText: { color: PINK, fontSize: 13, fontWeight: '600' },
+  authBtn: {
+    backgroundColor: PINK,
     borderRadius: 14,
     paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 4,
+    elevation: 4,
+    shadowColor: PINK,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+  },
+  authBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+    gap: 10,
+  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#EEE' },
+  dividerText: { color: '#BBB', fontSize: 13 },
+  googleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#E8E8E8',
+    borderRadius: 14,
+    paddingVertical: 14,
     gap: 10,
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    backgroundColor: '#FAFAFA',
   },
-  googleIcon: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#4285F4',
+  googleIconBox: {
+    width: 28, height: 28, borderRadius: 14,
+    backgroundColor: '#fff',
+    alignItems: 'center', justifyContent: 'center',
+    elevation: 2,
   },
-  googleBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1A1A2E',
+  googleIconText: { fontSize: 16, fontWeight: '900', color: '#4285F4' },
+  googleBtnText: { fontSize: 15, fontWeight: '600', color: '#333' },
+  switchBtn: { alignItems: 'center', marginTop: 20 },
+  switchText: { color: '#888', fontSize: 14 },
+  switchLink: { color: PINK, fontWeight: '700' },
+
+  // Decorative circles
+  decor1: {
+    position: 'absolute', top: -50, right: -50,
+    width: 200, height: 200, borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
-  terms: {
-    color: 'rgba(255,255,255,0.3)',
-    fontSize: 11,
-    textAlign: 'center',
-    marginTop: 16,
-    lineHeight: 18,
+  decor2: {
+    position: 'absolute', bottom: 20, left: -60,
+    width: 160, height: 160, borderRadius: 80,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+  },
+  decor3: {
+    position: 'absolute', top: 20, left: 20,
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
 });
