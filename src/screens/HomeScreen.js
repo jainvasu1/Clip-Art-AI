@@ -29,7 +29,7 @@ const validateAndPick = (response, onSuccess) => {
   onSuccess(asset);
 };
 
-export default function HomeScreen({ selectedStyles = [], onBack }) {
+export default function HomeScreen({ selectedStyles = [], onBack, onGenerate }) {
   const [image, setImage] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [promptEnabled, setPromptEnabled] = useState(false);
@@ -60,8 +60,11 @@ export default function HomeScreen({ selectedStyles = [], onBack }) {
 
   const handleGenerate = async () => {
     if (!image) return;
-    setGenerating(true);
-    setTimeout(() => setGenerating(false), 2000);
+    onGenerate({
+      imageBase64: image.base64,
+      customPrompt: promptEnabled ? prompt : '',
+      intensity: 0.35,
+    });
   };
 
   return (
