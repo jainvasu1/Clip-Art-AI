@@ -23,7 +23,10 @@ export default function App() {
         />
       )}
       {screen === 'home' && (
-        <HomeScreen selectedStyles={selectedStyles} />
+        <HomeScreen
+          selectedStyles={selectedStyles}
+          onBack={() => setScreen('styleSelect')}
+        />
       )}
     </>
   );
