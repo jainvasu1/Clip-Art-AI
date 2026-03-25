@@ -12,6 +12,7 @@ export default function LoginScreen({ onLoginSuccess }) {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -39,7 +40,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                 <Text style={styles.logoEmoji}>🎨</Text>
               </View>
               <Text style={styles.appName}>CLIPART AI</Text>
-              <Text style={styles.appTagline}>Powered by AI</Text>
+              <Text style={styles.appTagline}>Made by Vasudha</Text>
             </View>
           </View>
 
@@ -159,10 +160,21 @@ export default function LoginScreen({ onLoginSuccess }) {
               </View>
             </View>
 
-            {screen === 'signin' && (
-              <TouchableOpacity style={styles.forgotBtn}>
-                <Text style={styles.forgotText}>Forgot Password?</Text>
-              </TouchableOpacity>
+             {screen === 'signin' && (
+              <View style={styles.rememberRow}>
+                <TouchableOpacity
+                  style={styles.rememberLeft}
+                  onPress={() => setRememberMe(!rememberMe)}
+                  activeOpacity={0.8}>
+                  <View style={[styles.checkbox, rememberMe && styles.checkboxActive]}>
+                    {rememberMe && <Text style={styles.checkboxTick}>✓</Text>}
+                  </View>
+                  <Text style={styles.rememberText}>Remember Me</Text>
+                </TouchableOpacity>
+                <TouchableOpacity>
+                  <Text style={styles.forgotText}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
             )}
 
             <TouchableOpacity
@@ -347,6 +359,32 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 15, color: '#1A1A1A', paddingVertical: 2 },
   forgotBtn: { alignSelf: 'flex-end', marginBottom: 20 },
   forgotText: { color: PINK, fontSize: 13, fontWeight: '600' },
+  rememberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  rememberLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  checkbox: {
+    width: 20, height: 20, borderRadius: 6,
+    borderWidth: 2, borderColor: '#DDD',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  checkboxActive: {
+    backgroundColor: '#E8837A',
+    borderColor: '#E8837A',
+  },
+  checkboxTick: {
+    color: '#fff', fontSize: 11, fontWeight: '900',
+  },
+  rememberText: {
+    fontSize: 13, color: '#555', fontWeight: '500',
+  },
   authBtn: {
     backgroundColor: PINK,
     borderRadius: 14,
