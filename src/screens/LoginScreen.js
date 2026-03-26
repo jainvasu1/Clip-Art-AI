@@ -22,37 +22,19 @@ export default function LoginScreen({ onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Email/Password Auth
   const handleAuth = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
     setLoading(true);
-    try {
-      if (screen === 'signin') {
-        await auth().signInWithEmailAndPassword(email, password);
-      } else {
-        await auth().createUserWithEmailAndPassword(email, password);
-        if (name) {
-          await auth().currentUser.updateProfile({ displayName: name });
-        }
-      }
-      onLoginSuccess();
-    } catch (error) {
-      let msg = 'Something went wrong';
-      if (error.code === 'auth/email-already-in-use') msg = 'Email already in use';
-      if (error.code === 'auth/invalid-email') msg = 'Invalid email address';
-      if (error.code === 'auth/wrong-password') msg = 'Wrong password';
-      if (error.code === 'auth/user-not-found') msg = 'No account found with this email';
-      if (error.code === 'auth/weak-password') msg = 'Password should be at least 6 characters';
-      Alert.alert('Error', msg);
-    } finally {
+    setTimeout(() => {
       setLoading(false);
-    }
+      onLoginSuccess();
+    }, 1000);
   };
 
-  // Google Auth
+
   const handleGoogleLogin = async () => {
     try {
       setGoogleLoading(true);
@@ -63,7 +45,6 @@ export default function LoginScreen({ onLoginSuccess }) {
       onLoginSuccess();
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled
       } else if (error.code === statusCodes.IN_PROGRESS) {
         Alert.alert('Please wait', 'Sign in already in progress');
       } else {
@@ -75,7 +56,6 @@ export default function LoginScreen({ onLoginSuccess }) {
     }
   };
 
-  // ─── WELCOME SCREEN ───────────────────────────────────────
   if (screen === 'welcome') {
     return (
       <SafeAreaView style={styles.safe}>
@@ -89,7 +69,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                 <Text style={styles.logoEmoji}>🎨</Text>
               </View>
               <Text style={styles.appName}>CLIPART AI</Text>
-              <Text style={styles.appTagline}>Powered by AI</Text>
+              <Text style={styles.appTagline}>Made by Vasudha ❤️</Text>
             </View>
           </View>
 
@@ -127,7 +107,6 @@ export default function LoginScreen({ onLoginSuccess }) {
     );
   }
 
-  // ─── SIGN IN / SIGN UP SCREEN ─────────────────────────────
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
