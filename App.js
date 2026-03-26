@@ -5,6 +5,8 @@ import StyleSelectScreen from './src/screens/StyleSelectScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ResultScreen from './src/screens/ResultScreen';
 import { generateAllStyles } from './src/services/aiService';
+import { getAuth } from '@react-native-firebase/auth';
+const auth = getAuth;
 
 export default function App() {
   const [screen, setScreen] = useState('login');

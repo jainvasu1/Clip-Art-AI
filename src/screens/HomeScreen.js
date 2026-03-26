@@ -42,7 +42,13 @@ export default function HomeScreen({ selectedStyles = [], onBack, onGenerate }) 
         text: '📷 Camera',
         onPress: () =>
           launchCamera(
-            { mediaType: 'photo', includeBase64: true, quality: 0.8, maxWidth: 1024, maxHeight: 1024 },
+            {
+              mediaType: 'photo',
+              includeBase64: true,
+              quality: 1.0,
+              maxWidth: 1024,
+              maxHeight: 1024,
+            },
             res => validateAndPick(res, setImage),
           ),
       },
@@ -50,7 +56,13 @@ export default function HomeScreen({ selectedStyles = [], onBack, onGenerate }) 
         text: '🖼️ Choose from Gallery',
         onPress: () =>
           launchImageLibrary(
-            { mediaType: 'photo', includeBase64: true, quality: 0.8, maxWidth: 1024, maxHeight: 1024 },
+            {
+              mediaType: 'photo',
+              includeBase64: true,
+              quality: 1.0,
+              maxWidth: 1024,
+              maxHeight: 1024,
+            },
             res => validateAndPick(res, setImage),
           ),
       },
@@ -60,6 +72,8 @@ export default function HomeScreen({ selectedStyles = [], onBack, onGenerate }) 
 
   const handleGenerate = async () => {
     if (!image) return;
+    console.log('Generate pressed, image base64 length:', image.base64?.length);
+    console.log('Image dimensions:', image.width, 'x', image.height);
     onGenerate({
       imageBase64: image.base64,
       customPrompt: promptEnabled ? prompt : '',
@@ -112,7 +126,7 @@ export default function HomeScreen({ selectedStyles = [], onBack, onGenerate }) 
           </TouchableOpacity>
         )}
 
-       {/* Selected styles */}
+        {/* Selected styles */}
         {selectedStyles.length > 0 && (
           <View style={styles.stylesSection}>
             <Text style={styles.stylesSectionTitle}>Selected Styles</Text>
@@ -154,7 +168,7 @@ export default function HomeScreen({ selectedStyles = [], onBack, onGenerate }) 
           {promptEnabled && (
             <TextInput
               style={styles.promptInput}
-              placeholder="e.g. Pink and yellow floral pattern, green and yellow leaves, emerald green background"
+              placeholder="e.g. Pink and yellow floral pattern, emerald green background"
               placeholderTextColor="#BBB"
               value={prompt}
               onChangeText={setPrompt}
@@ -206,7 +220,6 @@ const PINK = '#E8837A';
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F8F8F8' },
-
   header: {
     paddingHorizontal: 20,
     paddingTop: 16,
@@ -218,13 +231,9 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A1A' },
   backBtn: { position: 'absolute', left: 20 },
   backBtnText: { fontSize: 22, color: '#1A1A1A', fontWeight: '600' },
-
   content: { flex: 1, paddingHorizontal: 20, paddingTop: 8 },
-
   title: { fontSize: 22, fontWeight: '800', color: '#1A1A1A', marginBottom: 8 },
   subtitle: { fontSize: 14, color: '#888', lineHeight: 22, marginBottom: 24 },
-
-  // Upload
   uploadBox: {
     backgroundColor: '#FFF0EF',
     borderRadius: 20,
@@ -248,8 +257,6 @@ const styles = StyleSheet.create({
   uploadIcon: { fontSize: 28 },
   uploadText: { fontSize: 16, fontWeight: '700', color: PINK },
   uploadHint: { fontSize: 12, color: '#BBB' },
-
-  // Preview
   previewBox: {
     borderRadius: 20, overflow: 'hidden',
     height: 280, position: 'relative',
@@ -269,8 +276,6 @@ const styles = StyleSheet.create({
     borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4,
   },
   infoBadgeText: { color: '#fff', fontSize: 11 },
-
-  // Pills
   pillsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
   pill: {
     backgroundColor: '#FFF0EF', borderRadius: 20,
@@ -278,19 +283,11 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#F5C5C2',
   },
   pillText: { color: PINK, fontSize: 12, fontWeight: '600', textTransform: 'capitalize' },
-  stylesSection: {
-    marginTop: 14,
-  },
+  stylesSection: { marginTop: 14 },
   stylesSectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#999',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 8,
+    fontSize: 13, fontWeight: '700', color: '#999',
+    textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8,
   },
-
-  // Option cards
   optionCard: {
     backgroundColor: '#fff', borderRadius: 16,
     padding: 16, marginTop: 14,
@@ -321,8 +318,6 @@ const styles = StyleSheet.create({
     lineHeight: 22, minHeight: 80,
     textAlignVertical: 'top',
   },
-
-  // Generate
   generateBtn: {
     position: 'absolute', bottom: 24, left: 20, right: 20,
     backgroundColor: PINK, borderRadius: 50,
