@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { STABILITY_API_KEY } from '@env';
-
+const STABILITY_API_KEY = 'sk-ETmpIFt1L2N8otm9pTd4V5tZlqfGTu1aaYjVe3Iwl34A1iYx';
 const STYLE_PROMPTS = {
   cartoon: 'cartoon style, vibrant colors, bold outlines, fun and playful, disney pixar style',
   flat: 'flat illustration style, minimal design, geometric shapes, clean vector art, 2D flat design',
