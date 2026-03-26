@@ -4,6 +4,13 @@ import {
   SafeAreaView, TextInput, KeyboardAvoidingView,
   Platform, ScrollView, Alert, ActivityIndicator,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { GOOGLE_WEB_CLIENT_ID } from '@env';
+
+GoogleSignin.configure({
+  webClientId: GOOGLE_WEB_CLIENT_ID,
+});
 
 export default function LoginScreen({ onLoginSuccess }) {
   const [screen, setScreen] = useState('welcome');
@@ -11,19 +18,61 @@ export default function LoginScreen({ onLoginSuccess }) {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
+  // Email/Password Auth
   const handleAuth = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      if (screen === 'signin') {
+        await auth().signInWithEmailAndPassword(email, password);
+      } else {
+        await auth().createUserWithEmailAndPassword(email, password);
+        if (name) {
+          await auth().currentUser.updateProfile({ displayName: name });
+        }
+      }
       onLoginSuccess();
-    }, 1500);
+    } catch (error) {
+      let msg = 'Something went wrong';
+      if (error.code === 'auth/email-already-in-use') msg = 'Email already in use';
+      if (error.code === 'auth/invalid-email') msg = 'Invalid email address';
+      if (error.code === 'auth/wrong-password') msg = 'Wrong password';
+      if (error.code === 'auth/user-not-found') msg = 'No account found with this email';
+      if (error.code === 'auth/weak-password') msg = 'Password should be at least 6 characters';
+      Alert.alert('Error', msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Google Auth
+  const handleGoogleLogin = async () => {
+    try {
+      setGoogleLoading(true);
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const googleCredential = auth.GoogleAuthProvider.credential(userInfo.idToken);
+      await auth().signInWithCredential(googleCredential);
+      onLoginSuccess();
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        Alert.alert('Please wait', 'Sign in already in progress');
+      } else {
+        Alert.alert('Error', 'Google Sign-In failed. Try again.');
+        console.log('Google error:', error);
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   // ─── WELCOME SCREEN ───────────────────────────────────────
@@ -40,7 +89,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                 <Text style={styles.logoEmoji}>🎨</Text>
               </View>
               <Text style={styles.appName}>CLIPART AI</Text>
-              <Text style={styles.appTagline}>Made by Vasudha</Text>
+              <Text style={styles.appTagline}>Powered by AI</Text>
             </View>
           </View>
 
@@ -160,7 +209,7 @@ export default function LoginScreen({ onLoginSuccess }) {
               </View>
             </View>
 
-             {screen === 'signin' && (
+            {screen === 'signin' && (
               <View style={styles.rememberRow}>
                 <TouchableOpacity
                   style={styles.rememberLeft}
@@ -197,11 +246,21 @@ export default function LoginScreen({ onLoginSuccess }) {
               <View style={styles.dividerLine} />
             </View>
 
-            <TouchableOpacity style={styles.googleBtn} activeOpacity={0.85}>
-              <View style={styles.googleIconBox}>
-                <Text style={styles.googleIconText}>G</Text>
-              </View>
-              <Text style={styles.googleBtnText}>Continue with Google</Text>
+            <TouchableOpacity
+              style={styles.googleBtn}
+              onPress={handleGoogleLogin}
+              activeOpacity={0.85}
+              disabled={googleLoading}>
+              {googleLoading ? (
+                <ActivityIndicator color="#4285F4" />
+              ) : (
+                <>
+                  <View style={styles.googleIconBox}>
+                    <Text style={styles.googleIconText}>G</Text>
+                  </View>
+                  <Text style={styles.googleBtnText}>Continue with Google</Text>
+                </>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -227,195 +286,106 @@ const PINK = '#E8837A';
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: PINK },
-
-  // Welcome
   welcomeContainer: { flex: 1 },
   welcomeTop: {
-    height: 360,
-    backgroundColor: PINK,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+    height: 360, backgroundColor: PINK,
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   welcomeBottom: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    marginTop: -40,
-    padding: 28,
-    paddingTop: 32,
+    flex: 1, backgroundColor: '#fff',
+    borderTopLeftRadius: 40, borderTopRightRadius: 40,
+    marginTop: -40, padding: 28, paddingTop: 32,
   },
-
-  // Logo
   logoContainer: { alignItems: 'center', gap: 10 },
   logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 72, height: 72, borderRadius: 36,
     backgroundColor: 'rgba(255,255,255,0.25)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.4)',
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)',
   },
   logoEmoji: { fontSize: 32 },
-  appName: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: '#fff',
-    letterSpacing: 4,
-  },
-  appTagline: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-
-  welcomeTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 8,
-  },
-  welcomeSubtitle: {
-    fontSize: 14,
-    color: '#888',
-    lineHeight: 22,
-    marginBottom: 24,
-  },
+  appName: { fontSize: 26, fontWeight: '900', color: '#fff', letterSpacing: 4 },
+  appTagline: { fontSize: 12, color: 'rgba(255,255,255,0.7)', letterSpacing: 2 },
+  welcomeTitle: { fontSize: 28, fontWeight: '800', color: '#1A1A1A', marginBottom: 8 },
+  welcomeSubtitle: { fontSize: 14, color: '#888', lineHeight: 22, marginBottom: 24 },
   bulletList: { gap: 12, marginBottom: 28 },
-  bulletRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
+  bulletRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   bulletIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 36, height: 36, borderRadius: 10,
     backgroundColor: '#FFF0EF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'center', justifyContent: 'center',
   },
   bulletIcon: { fontSize: 18 },
   bulletText: { fontSize: 14, color: '#444', fontWeight: '500', flex: 1 },
   continueBtn: {
-    backgroundColor: PINK,
-    borderRadius: 50,
-    paddingVertical: 16,
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: PINK,
+    backgroundColor: PINK, borderRadius: 50,
+    paddingVertical: 16, alignItems: 'center',
+    elevation: 4, shadowColor: PINK,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+    shadowOpacity: 0.4, shadowRadius: 8,
   },
   continueBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-
-  // Auth
   authTop: {
-    height: 200,
-    backgroundColor: PINK,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+    height: 200, backgroundColor: PINK,
+    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
   },
   authCard: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    marginTop: -40,
-    padding: 28,
-    paddingTop: 32,
+    flex: 1, backgroundColor: '#fff',
+    borderTopLeftRadius: 40, borderTopRightRadius: 40,
+    marginTop: -40, padding: 28, paddingTop: 32,
   },
   backBtn: { position: 'absolute', top: 20, left: 20 },
   backBtnText: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  authTitle: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 6,
-  },
+  authTitle: { fontSize: 30, fontWeight: '800', color: '#1A1A1A', marginBottom: 6 },
   titleUnderline: {
-    width: 40, height: 3,
-    backgroundColor: PINK,
-    borderRadius: 2,
-    marginBottom: 24,
+    width: 40, height: 3, backgroundColor: PINK,
+    borderRadius: 2, marginBottom: 24,
   },
   inputGroup: { marginBottom: 16 },
   inputLabel: { fontSize: 13, fontWeight: '600', color: '#333', marginBottom: 6 },
   inputBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#E8E8E8',
-    paddingBottom: 8,
-    gap: 8,
+    flexDirection: 'row', alignItems: 'center',
+    borderBottomWidth: 1.5, borderBottomColor: '#E8E8E8',
+    paddingBottom: 8, gap: 8,
   },
   inputIcon: { fontSize: 16 },
   input: { flex: 1, fontSize: 15, color: '#1A1A1A', paddingVertical: 2 },
-  forgotBtn: { alignSelf: 'flex-end', marginBottom: 20 },
-  forgotText: { color: PINK, fontSize: 13, fontWeight: '600' },
   rememberRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', marginBottom: 20,
   },
-  rememberLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
+  rememberLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   checkbox: {
     width: 20, height: 20, borderRadius: 6,
     borderWidth: 2, borderColor: '#DDD',
     alignItems: 'center', justifyContent: 'center',
   },
-  checkboxActive: {
-    backgroundColor: '#E8837A',
-    borderColor: '#E8837A',
-  },
-  checkboxTick: {
-    color: '#fff', fontSize: 11, fontWeight: '900',
-  },
-  rememberText: {
-    fontSize: 13, color: '#555', fontWeight: '500',
-  },
+  checkboxActive: { backgroundColor: PINK, borderColor: PINK },
+  checkboxTick: { color: '#fff', fontSize: 11, fontWeight: '900' },
+  rememberText: { fontSize: 13, color: '#555', fontWeight: '500' },
+  forgotText: { color: PINK, fontSize: 13, fontWeight: '600' },
   authBtn: {
-    backgroundColor: PINK,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 4,
-    elevation: 4,
+    backgroundColor: PINK, borderRadius: 14,
+    paddingVertical: 16, alignItems: 'center',
+    marginTop: 4, elevation: 4,
     shadowColor: PINK,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
+    shadowOpacity: 0.35, shadowRadius: 8,
   },
   authBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-    gap: 10,
+    flexDirection: 'row', alignItems: 'center',
+    marginVertical: 20, gap: 10,
   },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#EEE' },
   dividerText: { color: '#BBB', fontSize: 13 },
   googleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#E8E8E8',
-    borderRadius: 14,
-    paddingVertical: 14,
-    gap: 10,
-    backgroundColor: '#FAFAFA',
+    borderWidth: 1.5, borderColor: '#E8E8E8',
+    borderRadius: 14, paddingVertical: 14,
+    gap: 10, backgroundColor: '#FAFAFA',
+    minHeight: 52,
   },
   googleIconBox: {
     width: 28, height: 28, borderRadius: 14,
@@ -428,8 +398,6 @@ const styles = StyleSheet.create({
   switchBtn: { alignItems: 'center', marginTop: 20 },
   switchText: { color: '#888', fontSize: 14 },
   switchLink: { color: PINK, fontWeight: '700' },
-
-  // Decorative circles
   decor1: {
     position: 'absolute', top: -50, right: -50,
     width: 200, height: 200, borderRadius: 100,
