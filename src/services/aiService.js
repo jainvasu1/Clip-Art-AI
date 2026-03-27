@@ -1,58 +1,62 @@
 import axios from 'axios';
-const STABILITY_API_KEY = 'sk-ETmpIFt1L2N8otm9pTd4V5tZlqfGTu1aaYjVe3Iwl34A1iYx';
+import { HF_API_TOKEN } from '@env';
+
 const STYLE_PROMPTS = {
-  cartoon: 'cartoon style, vibrant colors, bold outlines, fun and playful, disney pixar style',
-  flat: 'flat illustration style, minimal design, geometric shapes, clean vector art, 2D flat design',
-  anime: 'anime style, japanese animation, clean lines, expressive eyes, studio ghibli style',
+  cartoon: 'cartoon style, vibrant colors, bold outlines, disney pixar style, high quality',
+  flat: 'flat illustration style, minimal design, geometric shapes, clean vector art',
+  anime: 'anime style, japanese animation, clean lines, expressive eyes, studio ghibli',
   pixel: 'pixel art style, 16-bit retro game art, pixelated, game sprite',
-  sketch: 'pencil sketch style, hand drawn, black and white outline art, detailed sketch',
-  clay: 'clay 3D style, soft clay material, pastel colors, cute 3D render, blender clay art style',
+  sketch: 'pencil sketch, hand drawn, black and white outline art, detailed',
+  clay: 'clay 3D style, soft clay material, pastel colors, cute 3D render',
 };
 
-const STABILITY_URL =
-  'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/image-to-image';
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const generateClipart = async ({
   imageBase64,
   styleId,
   customPrompt = '',
-  intensity = 0.35,
   onComplete,
 }) => {
   try {
     const stylePrompt = STYLE_PROMPTS[styleId] || STYLE_PROMPTS.cartoon;
     const finalPrompt = customPrompt
-      ? `${stylePrompt}, ${customPrompt}, clipart style, high quality`
-      : `${stylePrompt}, clipart style, high quality`;
+      ? `${stylePrompt}, ${customPrompt}`
+      : stylePrompt;
 
-    const formData = new FormData();
-    formData.append('init_image', {
-      uri: `data:image/jpeg;base64,${imageBase64}`,
-      type: 'image/jpeg',
-      name: 'input.jpg',
-    });
-    formData.append('init_image_mode', 'IMAGE_STRENGTH');
-    formData.append('image_strength', String(intensity));
-    formData.append('steps', '30');
-    formData.append('cfg_scale', '7');
-    formData.append('samples', '1');
-    formData.append('text_prompts[0][text]', finalPrompt);
-    formData.append('text_prompts[0][weight]', '1');
-    formData.append('text_prompts[1][text]', 'blurry, bad quality, watermark, realistic photo');
-    formData.append('text_prompts[1][weight]', '-1');
-
-    const response = await axios.post(STABILITY_URL, formData, {
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${STABILITY_API_KEY}`,
-        'Content-Type': 'multipart/form-data',
+    const response = await axios.post(
+      'https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0',
+      {
+        inputs: finalPrompt,
+        parameters: {
+          negative_prompt: 'blurry, bad quality, watermark, text, realistic photo',
+          num_inference_steps: 20,
+          guidance_scale: 7.5,
+        },
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${HF_API_TOKEN}`,
+          'Content-Type': 'application/json',
+          Accept: 'image/png',
+        },
+        responseType: 'arraybuffer',
+        timeout: 120000,
+      }
+    );
 
-    const base64Image = response.data.artifacts[0].base64;
-    onComplete(styleId, { status: 'success', base64: base64Image });
+    // Convert to base64
+    const bytes = new Uint8Array(response.data);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = `data:image/png;base64,${btoa(binary)}`;
+
+    onComplete(styleId, { status: 'success', base64 });
+
   } catch (error) {
-    console.log('AI Error:', error?.response?.data || error.message);
+    console.log('AI Error:', error?.response?.status, error?.response?.data?.toString() || error.message);
     onComplete(styleId, { status: 'error' });
   }
 };
@@ -61,17 +65,14 @@ export const generateAllStyles = async ({
   imageBase64,
   selectedStyles,
   customPrompt = '',
-  intensity = 0.35,
   onStyleComplete,
 }) => {
-  const promises = selectedStyles.map(styleId =>
-    generateClipart({
+  for (const styleId of selectedStyles) {
+    await generateClipart({
       imageBase64,
       styleId,
       customPrompt,
-      intensity,
       onComplete: onStyleComplete,
-    })
-  );
-  await Promise.all(promises);
+    });
+  }
 };
